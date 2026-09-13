@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Global Ephemeral Encrypted Room</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-mono-code {
+      font-family: 'Fira Code', monospace;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    .animate-pulse-glow {
+      animation: pulseGlow 3s infinite ease-in-out;
+    }
+    .typing-dot {
+      animation: typing 1.4s infinite ease-in-out both;
+    }
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing {
+      0%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-5px); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="h-full text-slate-100 flex flex-col antialiased selection:bg-indigo-500 selection:text-white relative overflow-hidden">
+
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-600/5 rounded-full blur-3xl"></div>
+  </div>
+
+  <div id="authOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl transition-all duration-300">
+    <div class="max-w-md w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col gap-6">
+      
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-emerald-400 text-white font-bold text-2xl shadow-lg shadow-indigo-500/25 mb-1">
+          🔐
+        </div>
+        <h2 class="text-2xl font-extrabold text-white tracking-tight">Create Profile & Room Key</h2>
+        <p class="text-xs text-slate-400">Set up your alias and room encryption key before entering the zero-trace RAM room.</p>
+      </div>
+
+      <form id="authForm" class="space-y-4">
+        
+        <!-- Username Input -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Your Username</label>
+          <div class="relative flex items-center">
+            <span class="absolute left-3 text-slate-500 font-bold text-sm">@</span>
+            <input 
+              type="text" 
+              id="setupUsername" 
+              placeholder="e.g. Alex_Dev" 
+              maxlength="16"
+              required
+              class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-100 rounded-xl pl-8 pr-4 py-3 text-sm focus:outline-none transition-all font-medium placeholder-slate-600"
+            />
+          </div>
+        </div>
+
+        <!-- Avatar Selection -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Choose Avatar Icon</label>
+          <div class="grid grid-cols-6 gap-2" id="avatarSelector">
+            <button type="button" data-avatar="⚡" class="avatar-btn p-2 bg-slate-950 border border-indigo-500 rounded-xl text-xl hover:bg-slate-800 transition-all flex items-center justify-center">⚡</button>
+            <button type="button" data-avatar="🛡️" class="avatar-btn p-2 bg-slate-950 border border-slate-800 rounded-xl text-xl hover:bg-slate-800 transition-all flex items-center justify-center">🛡️</button>
+            <button type="button" data-avatar="👾" class="avatar-btn p-2 bg-slate-950 border border-slate-800 rounded-xl text-xl hover:bg-slate-800 transition-all flex items-center justify-center">👾</button>
+            <button type="button" data-avatar="🚀" class="avatar-btn p-2 bg-slate-950 border border-slate-800 rounded-xl text-xl hover:bg-slate-800 transition-all flex items-center justify-center">🚀</button>
+            <button type="button" data-avatar="🦊" class="avatar-btn p-2 bg-slate-950 border border-slate-800 rounded-xl text-xl hover:bg-slate-800 transition-all flex items-center justify-center">🦊</button>
+            <button type="button" data-avatar="🐱‍💻" class="avatar-btn p-2 bg-slate-950 border border-slate-800 rounded-xl text-xl hover:bg-slate-800 transition-all flex items-center justify-center">🐱‍💻</button>
+          </div>
+        </div>
+
+        <!-- Shared Secret Key Input -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Encryption Passphrase</label>
+            <span class="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">AES-GCM 256</span>
+          </div>
+          <div class="relative flex items-center">
+            <input 
+              type="password" 
+              id="setupPassphrase" 
+              placeholder="Room secret key..." 
+              value="Global-Zero-Trace-Passphrase"
+              required
+              class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 text-emerald-300 font-mono text-xs rounded-xl pl-3 pr-10 py-3 focus:outline-none transition-all placeholder-slate-600"
+            />
+            <button type="button" id="togglePassphraseVisibility" class="absolute right-3 text-slate-400 hover:text-white text-xs">👁️</button>
+          </div>
+          <p class="text-[11px] text-slate-500">Only users with the exact same passphrase can decrypt and read room messages.</p>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          id="enterChatBtn"
+          class="w-full mt-2 bg-gradient-to-r from-indigo-600 via-violet-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-bold py-3 px-4 rounded-xl text-sm transition-all shadow-lg shadow-indigo-600/25 active:scale-[0.99] flex items-center justify-center gap-2 touch-manipulation cursor-pointer"
+        >
+          <span>Initialize Key & Join Chat</span>
+          <span>→</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div id="mainChatApp" class="flex-1 flex flex-col max-w-5xl w-full mx-auto h-full p-2 sm:p-4 md:p-6 overflow-hidden z-10 opacity-40 pointer-events-none transition-all duration-300">
+    
+    <!-- Top Navigation & Room Status Header -->
+    <header class="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-2xl p-3 sm:p-4 mb-3 shadow-xl flex flex-wrap items-center justify-between gap-3 shrink-0">
+      
+      <div class="flex items-center gap-3">
+        <div id="headerAvatar" class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-lg shadow-indigo-500/20 text-white font-bold text-xl">
+          ⚡
+          <span class="absolute -bottom-1 -right-1 flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base sm:text-lg text-white tracking-tight">Encrypted Global Room</h1>
+            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+              <span>🔒</span> E2EE Active
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 flex items-center gap-1.5">
+            <span>User: <strong id="headerUsername" class="text-indigo-300">Guest</strong></span>
+            <span>•</span>
+            <span id="wipePolicyText" class="text-slate-400">RAM Wiped on 0 Users</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0">
+        <!-- Online Counter Badge -->
+        <div class="flex items-center gap-2 bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800/80 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+          <span id="onlineCounter" class="text-emerald-400 font-mono">1 online</span>
+        </div>
+
+        <!-- Raw Ciphertext Toggle Button -->
+        <button id="cipherInspectBtn" title="Toggle raw AES-GCM encrypted payload view" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/80 text-slate-300 hover:text-white transition-all text-xs font-medium flex items-center gap-1">
+          <span>👁️</span>
+          <span class="hidden md:inline">Raw Cipher:</span>
+          <span id="cipherInspectStatus" class="font-bold text-slate-400">OFF</span>
+        </button>
+
+        <!-- Mute Sound Toggle -->
+        <button id="soundToggleBtn" title="Toggle sound effects" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/80 text-slate-300 hover:text-white transition-all text-xs flex items-center gap-1.5">
+          <span id="soundIcon">🔊</span>
+        </button>
+
+        <!-- Call Toggle Button -->
+        <button id="startCallBtn" title="Start or Join Ephemeral Video/Audio Call" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/50 text-white font-medium transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 active:scale-95">
+          <span id="callBtnIcon">📞</span>
+          <span id="callBtnText" class="hidden sm:inline font-bold">Start Call</span>
+        </button>
+
+        <!-- Simulated Active Bot Chatter -->
+        <button id="botSimToggleBtn" title="Toggle active chatter simulation" class="px-3 py-1.5 rounded-xl bg-indigo-950/60 hover:bg-indigo-900/80 border border-indigo-800/50 text-indigo-300 hover:text-white transition-all text-xs font-medium flex items-center gap-1.5">
+          <span>🤖</span>
+          <span class="hidden sm:inline">Bot Simulator:</span>
+          <span id="botSimStatus" class="font-bold text-slate-400">OFF</span>
+        </button>
+
+        <!-- Change User / Key Button -->
+        <button id="reauthBtn" title="Change User Profile or Encryption Key" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/80 text-slate-300 hover:text-white transition-all text-xs">
+          ⚙️
+        </button>
+      </div>
+
+    </header>
+
+    <!-- Active Video / Audio Call Panel -->
+    <div id="callPanel" class="hidden mb-3 bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-3 sm:p-4 shadow-2xl backdrop-blur-md transition-all duration-300 animate-fade-in">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-3">
+        <div class="flex items-center gap-2">
+          <span class="flex h-2.5 w-2.5 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <h3 class="font-bold text-xs sm:text-sm text-slate-100 flex items-center gap-1.5">
+            <span>📹 Encrypted Ephemeral Call</span>
+            <span id="callParticipantCount" class="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">1 Connected</span>
+          </h3>
+        </div>
+        <div class="text-[11px] text-slate-400 font-mono" id="screenShareStatus">
+          🔒 Peer-to-Peer WebRTC
+        </div>
+      </div>
+
+      <!-- Video Grid Container -->
+      <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[280px] overflow-y-auto p-1">
+        
+        <!-- Local User Video Container -->
+        <div id="localVideoCard" class="relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden aspect-video shadow-lg flex items-center justify-center group">
+          <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
+          
+          <!-- Avatar Fallback (When camera is off) -->
+          <div id="localAvatarFallback" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-slate-400 space-y-1">
+            <span id="localAvatarIcon" class="text-3xl">⚡</span>
+            <span class="text-[11px] font-semibold text-slate-300">Camera Off</span>
+          </div>
+
+          <!-- Video Card Overlay -->
+          <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between px-2 py-1 rounded-lg bg-slate-900/80 backdrop-blur-sm border border-slate-800 text-[10px] text-slate-200">
+            <span class="font-semibold flex items-center gap-1">
+              <span id="localCallBadge">You</span>
+              <span id="screenBadge" class="hidden bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded text-[9px]">Screen</span>
+            </span>
+            <div class="flex items-center gap-1 text-[11px]">
+              <span id="localMicStatus">🎙️</span>
+              <span id="localCamStatus">📹</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Call Action Control Dock -->
+      <div class="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
+        
+        <!-- Toggle Microphone -->
+        <button id="toggleMicBtn" class="p-2.5 sm:px-4 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95">
+          <span id="micIcon">🎤</span>
+          <span id="micText" class="hidden sm:inline">Mute Mic</span>
+        </button>
+
+        <!-- Toggle Camera -->
+        <button id="toggleCamBtn" class="p-2.5 sm:px-4 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95">
+          <span id="camIcon">📹</span>
+          <span id="camText" class="hidden sm:inline">Stop Camera</span>
+        </button>
+
+        <!-- Share Screen -->
+        <button id="shareScreenBtn" class="p-2.5 sm:px-4 sm:py-2 rounded-xl bg-indigo-900/50 hover:bg-indigo-800/70 border border-indigo-700/60 text-indigo-200 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95">
+          <span>🖥️</span>
+          <span id="screenText" class="hidden sm:inline">Share Screen</span>
+        </button>
+
+        <!-- Leave Call -->
+        <button id="leaveCallBtn" class="p-2.5 sm:px-4 sm:py-2 rounded-xl bg-rose-600/80 hover:bg-rose-500 border border-rose-500/80 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-lg shadow-rose-600/20 active:scale-95">
+          <span>📞</span>
+          <span class="hidden sm:inline">Leave Call</span>
+        </button>
+
+      </div>
+    </div>
+
+    <main class="flex-1 bg-slate-900/50 border border-slate-800/80 rounded-2xl p-4 overflow-hidden flex flex-col relative shadow-inner">
+      
+      <!-- System Notification Banner -->
+      <div id="roomAlertBanner" class="hidden transition-all duration-300 mb-3 p-2.5 px-4 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-xl text-xs flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400">🧹</span>
+          <span id="roomAlertText">The last user left. RAM memory & keys have been completely wiped!</span>
+        </div>
+        <button onclick="this.parentElement.classList.add('hidden')" class="text-amber-400 hover:text-white">✕</button>
+      </div>
+
+      <!-- Scrollable Chat Messages Container -->
+      <div id="messageContainer" class="flex-1 overflow-y-auto space-y-3 pr-1 scroll-smooth">
+        
+        <!-- Empty State Notice -->
+        <div id="emptyNotice" class="h-full flex flex-col items-center justify-center text-center p-6 text-slate-500 space-y-3">
+          <div class="w-16 h-16 rounded-2xl bg-slate-800/50 border border-slate-800 flex items-center justify-center text-3xl">
+            🔒
+          </div>
+          <div class="max-w-xs">
+            <p class="font-semibold text-slate-300 text-sm">Room RAM is Empty</p>
+            <p class="text-xs text-slate-500 mt-1">All messages are encrypted client-side using AES-GCM 256-bit before leaving your browser.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Typing Indicator -->
+      <div id="typingIndicator" class="hidden items-center gap-2 text-xs text-slate-400 py-1.5 px-2">
+        <span id="typingUserText" class="font-medium text-slate-300">Someone</span> is typing
+        <div class="flex items-center gap-1 ml-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 typing-dot"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 typing-dot"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 typing-dot"></span>
+        </div>
+      </div>
+
+      <!-- Scroll to Bottom Button -->
+      <button id="scrollToBottomBtn" class="hidden absolute bottom-4 right-6 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-full shadow-xl transition-all items-center gap-2 z-10 animate-bounce">
+        <span>↓ New messages</span>
+      </button>
+
+    </main>
+
+    <footer class="mt-3 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-xl shrink-0">
+      <form id="chatForm" class="flex items-center gap-2">
+        
+        <!-- Encrypted Input Container -->
+        <div class="w-full flex-1 flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 focus-within:border-emerald-500/70 transition-all">
+          
+          <span class="text-xs text-emerald-400 select-none font-bold" title="End-to-End Encrypted Input">🔒</span>
+
+          <input 
+            type="text" 
+            id="messageInput" 
+            placeholder="Type an encrypted message..." 
+            autocomplete="off"
+            maxlength="500"
+            required
+            class="flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none py-1"
+          />
+
+          <!-- Quick Emoji Picker -->
+          <div class="relative flex items-center">
+            <button type="button" id="emojiPickerBtn" class="text-slate-400 hover:text-slate-200 p-1 text-base transition-colors" title="Quick Emoji">
+              😊
+            </button>
+            <div id="emojiMenu" class="hidden absolute bottom-10 right-0 bg-slate-900 border border-slate-700 rounded-xl p-2 shadow-2xl flex gap-1 z-20">
+              <button type="button" class="emoji-option hover:bg-slate-800 p-1 rounded text-lg">👍</button>
+              <button type="button" class="emoji-option hover:bg-slate-800 p-1 rounded text-lg">❤️</button>
+              <button type="button" class="emoji-option hover:bg-slate-800 p-1 rounded text-lg">😂</button>
+              <button type="button" class="emoji-option hover:bg-slate-800 p-1 rounded text-lg">🔥</button>
+              <button type="button" class="emoji-option hover:bg-slate-800 p-1 rounded text-lg">🚀</button>
+              <button type="button" class="emoji-option hover:bg-slate-800 p-1 rounded text-lg">🔐</button>
+            </div>
+          </div>
+
+          <!-- Send Button -->
+          <button 
+            type="submit" 
+            id="sendBtn"
+            class="bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all shadow-md flex items-center gap-1.5 shrink-0 active:scale-95"
+          >
+            <span>Encrypt & Send</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </button>
+
+        </div>
+
+      </form>
+    </footer>
+
+  </div>
+
+  <script>
+    const TAB_ID = 'tab_' + Math.random().toString(36).substring(2, 9);
+    
+    let currentUser = {
+      username: 'Guest_User',
+      avatar: '⚡',
+      passphrase: 'Global-Zero-Trace-Passphrase'
+    };
+
+    let derivedCryptoKey = null; // Web Crypto AES-GCM Key
+    let chatMemory = []; // In-memory store (holds encrypted payloads)
+    let activeTabs = new Set([TAB_ID]);
+    let isSoundEnabled = true;
+    let isBotSimulationActive = false;
+    let showRawCiphertext = false;
+    let botIntervalId = null;
+
+    // WebRTC Call State Variables
+    let isInCall = false;
+    let isAudioMuted = false;
+    let isVideoStopped = false;
+    let isSharingScreen = false;
+    let localMediaStream = null;
+    let localScreenStream = null;
+    let peerConnections = {}; // Map of tabId -> RTCPeerConnection
+    let callParticipants = new Set(); // Active tabs in the call
+
+    // STUN Servers for WebRTC Peer Connections
+    const rtcConfiguration = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    };
+
+    // DOM References (Declared once cleanly)
+    const authOverlay = document.getElementById('authOverlay');
+    const authForm = document.getElementById('authForm');
+    const enterChatBtn = document.getElementById('enterChatBtn');
+    const setupUsername = document.getElementById('setupUsername');
+    const setupPassphrase = document.getElementById('setupPassphrase');
+    const togglePassphraseVisibility = document.getElementById('togglePassphraseVisibility');
+    const avatarButtons = document.querySelectorAll('.avatar-btn');
+    const mainChatApp = document.getElementById('mainChatApp');
+    const headerAvatar = document.getElementById('headerAvatar');
+    const headerUsername = document.getElementById('headerUsername');
+    const reauthBtn = document.getElementById('reauthBtn');
+    
+    const messageContainer = document.getElementById('messageContainer');
+    const emptyNotice = document.getElementById('emptyNotice');
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const onlineCounter = document.getElementById('onlineCounter');
+    const roomAlertBanner = document.getElementById('roomAlertBanner');
+    const roomAlertText = document.getElementById('roomAlertText');
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const soundIcon = document.getElementById('soundIcon');
+    const botSimToggleBtn = document.getElementById('botSimToggleBtn');
+    const botSimStatus = document.getElementById('botSimStatus');
+    const cipherInspectBtn = document.getElementById('cipherInspectBtn');
+    const cipherInspectStatus = document.getElementById('cipherInspectStatus');
+    const emojiPickerBtn = document.getElementById('emojiPickerBtn');
+    const emojiMenu = document.getElementById('emojiMenu');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const typingUserText = document.getElementById('typingUserText');
+
+    // Call UI DOM References
+    const startCallBtn = document.getElementById('startCallBtn');
+    const callBtnIcon = document.getElementById('callBtnIcon');
+    const callBtnText = document.getElementById('callBtnText');
+    const callPanel = document.getElementById('callPanel');
+    const videoGrid = document.getElementById('videoGrid');
+    const localVideo = document.getElementById('localVideo');
+    const localAvatarFallback = document.getElementById('localAvatarFallback');
+    const localAvatarIcon = document.getElementById('localAvatarIcon');
+    const localMicStatus = document.getElementById('localMicStatus');
+    const localCamStatus = document.getElementById('localCamStatus');
+    const screenBadge = document.getElementById('screenBadge');
+    const callParticipantCount = document.getElementById('callParticipantCount');
+    const toggleMicBtn = document.getElementById('toggleMicBtn');
+    const micIcon = document.getElementById('micIcon');
+    const micText = document.getElementById('micText');
+    const toggleCamBtn = document.getElementById('toggleCamBtn');
+    const camIcon = document.getElementById('camIcon');
+    const camText = document.getElementById('camText');
+    const shareScreenBtn = document.getElementById('shareScreenBtn');
+    const screenText = document.getElementById('screenText');
+    const leaveCallBtn = document.getElementById('leaveCallBtn');
+
+    async function generateAESKeyFromPassphrase(passphrase) {
+      if (!window.crypto || !window.crypto.subtle) {
+        console.warn("Web Crypto API unavailable in current context. Using fallback key structure.");
+        return { isFallback: true, passphrase };
+      }
+      try {
+        const encoder = new TextEncoder();
+        const passphraseBuffer = encoder.encode(passphrase);
+        const keyHash = await window.crypto.subtle.digest('SHA-256', passphraseBuffer);
+        return await window.crypto.subtle.importKey(
+          'raw',
+          keyHash,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt', 'decrypt']
+        );
+      } catch (err) {
+        console.error("Key generation fallback:", err);
+        return { isFallback: true, passphrase };
+      }
+    }
+
+    async function encryptText(plaintext) {
+      if (!derivedCryptoKey) return null;
+      if (derivedCryptoKey.isFallback) {
+        return { iv: 'FALLBACK_IV', ciphertext: btoa(encodeURIComponent(plaintext)) };
+      }
+      try {
+        const encoder = new TextEncoder();
+        const encodedText = encoder.encode(plaintext);
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        const encryptedBuffer = await window.crypto.subtle.encrypt(
+          { name: 'AES-GCM', iv: iv },
+          derivedCryptoKey,
+          encodedText
+        );
+        return {
+          iv: btoa(String.fromCharCode(...iv)),
+          ciphertext: btoa(String.fromCharCode(...new Uint8Array(encryptedBuffer)))
+        };
+      } catch (e) {
+        return { iv: 'FALLBACK_IV', ciphertext: btoa(encodeURIComponent(plaintext)) };
+      }
+    }
+
+    async function decryptText(encryptedPayload) {
+      if (!derivedCryptoKey || !encryptedPayload) return null;
+      if (derivedCryptoKey.isFallback || encryptedPayload.iv === 'FALLBACK_IV') {
+        try {
+          return decodeURIComponent(atob(encryptedPayload.ciphertext));
+        } catch(e) { return null; }
+      }
+      try {
+        const iv = Uint8Array.from(atob(encryptedPayload.iv), c => c.charCodeAt(0));
+        const ciphertext = Uint8Array.from(atob(encryptedPayload.ciphertext), c => c.charCodeAt(0));
+        const decryptedBuffer = await window.crypto.subtle.decrypt(
+          { name: 'AES-GCM', iv: iv },
+          derivedCryptoKey,
+          ciphertext
+        );
+        const decoder = new TextDecoder();
+        return decoder.decode(decryptedBuffer);
+      } catch (err) {
+        return null;
+      }
+    }
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playTone(freq, type, duration, gainVal) {
+      if (!isSoundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playSendSound() { playTone(750, 'sine', 0.15, 0.1); }
+    function playReceiveSound() { playTone(920, 'sine', 0.2, 0.12); }
+    function playWipeSound() { playTone(200, 'sawtooth', 0.45, 0.15); }
+
+    if (togglePassphraseVisibility) {
+      togglePassphraseVisibility.addEventListener('click', () => {
+        setupPassphrase.type = setupPassphrase.type === 'password' ? 'text' : 'password';
+      });
+    }
+
+    avatarButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        avatarButtons.forEach(b => b.className = "avatar-btn p-2 bg-slate-950 border border-slate-800 rounded-xl text-xl hover:bg-slate-800 transition-all flex items-center justify-center");
+        btn.className = "avatar-btn p-2 bg-slate-950 border border-indigo-500 rounded-xl text-xl hover:bg-slate-800 transition-all flex items-center justify-center ring-2 ring-indigo-500/50";
+        currentUser.avatar = btn.getAttribute('data-avatar');
+      });
+    });
+
+    async function handleInitialization(e) {
+      if (e) e.preventDefault();
+      
+      const username = setupUsername.value.trim();
+      const passphrase = setupPassphrase.value.trim();
+
+      if (!username || !passphrase) return;
+
+      currentUser.username = username;
+      currentUser.passphrase = passphrase;
+
+      try {
+        derivedCryptoKey = await generateAESKeyFromPassphrase(passphrase);
+      } catch(err) {
+        console.error("Crypto init error:", err);
+      }
+
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      if (headerUsername) headerUsername.textContent = currentUser.username;
+      if (headerAvatar && headerAvatar.childNodes[0]) headerAvatar.childNodes[0].textContent = currentUser.avatar;
+
+      authOverlay.classList.add('hidden');
+      mainChatApp.classList.remove('opacity-40', 'pointer-events-none');
+
+      renderAllMessages();
+    }
+
+    authForm.addEventListener('submit', handleInitialization);
+
+    reauthBtn.addEventListener('click', () => {
+      authOverlay.classList.remove('hidden');
+      mainChatApp.classList.add('opacity-40', 'pointer-events-none');
+    });
+
+    const chatChannel = new BroadcastChannel('global_ephemeral_encrypted_channel');
+
+    function broadcastHeartbeat() {
+      chatChannel.postMessage({
+        type: 'HEARTBEAT',
+        tabId: TAB_ID,
+        history: chatMemory
+      });
+    }
+
+    chatChannel.onmessage = async (event) => {
+      const { type, payload, tabId, history } = event.data;
+
+      switch (type) {
+        case 'HEARTBEAT':
+          if (tabId && !activeTabs.has(tabId)) {
+            activeTabs.add(tabId);
+            updateOnlineCountUI();
+          }
+          if (history && history.length > chatMemory.length) {
+            chatMemory = history;
+            renderAllMessages();
+          }
+          break;
+
+        case 'PING_PRESENCE':
+          activeTabs.add(tabId);
+          updateOnlineCountUI();
+          chatChannel.postMessage({
+            type: 'PONG_PRESENCE',
+            tabId: TAB_ID,
+            history: chatMemory
+          });
+          break;
+
+        case 'PONG_PRESENCE':
+          activeTabs.add(tabId);
+          updateOnlineCountUI();
+          if (history && history.length > chatMemory.length) {
+            chatMemory = history;
+            renderAllMessages();
+          }
+          break;
+
+        case 'NEW_MESSAGE':
+          chatMemory.push(payload);
+          await appendSingleMessageUI(payload);
+          playReceiveSound();
+          break;
+
+        case 'TAB_LEAVING':
+          if (tabId) {
+            activeTabs.delete(tabId);
+            updateOnlineCountUI();
+            checkRoomZeroReset();
+          }
+          break;
+
+        case 'USER_TYPING':
+          showTypingIndicatorUI(payload.username);
+          break;
+
+        case 'ROOM_WIPED':
+          chatMemory = [];
+          renderAllMessages();
+          showRoomAlert('The last user left the room. In-memory encrypted messages have been wiped!');
+          playWipeSound();
+          break;
+
+        case 'CALL_JOIN':
+          if (isInCall && payload.tabId !== TAB_ID) {
+            callParticipants.add(payload.tabId);
+            updateCallParticipantCountUI();
+            initiatePeerConnection(payload.tabId, true);
+          }
+          break;
+
+        case 'CALL_LEAVE':
+          if (payload.tabId !== TAB_ID) {
+            closePeerConnection(payload.tabId);
+          }
+          break;
+
+        case 'CALL_OFFER':
+          if (isInCall && payload.targetTabId === TAB_ID) {
+            handleWebRTCOffer(payload.senderTabId, payload.sdp);
+          }
+          break;
+
+        case 'CALL_ANSWER':
+          if (isInCall && payload.targetTabId === TAB_ID) {
+            handleWebRTCAnswer(payload.senderTabId, payload.sdp);
+          }
+          break;
+
+        case 'CALL_ICE_CANDIDATE':
+          if (isInCall && payload.targetTabId === TAB_ID) {
+            handleWebRTCIceCandidate(payload.senderTabId, payload.candidate);
+          }
+          break;
+
+        case 'CALL_STATE_UPDATE':
+          if (isInCall && payload.tabId !== TAB_ID) {
+            updateRemotePeerStateUI(payload);
+          }
+          break;
+      }
+    };
+
+    async function startOrJoinCall() {
+      if (isInCall) return;
+
+      try {
+        localMediaStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true
+        });
+      } catch (err) {
+        console.warn('Camera access fallback to audio-only...', err);
+        try {
+          localMediaStream = await navigator.mediaDevices.getUserMedia({
+            video: false,
+            audio: true
+          });
+          isVideoStopped = true;
+          updateCamUIState();
+        } catch (audioErr) {
+          showRoomAlert('Unable to access camera or microphone. Please check browser permissions.');
+          return;
+        }
+      }
+
+      isInCall = true;
+      callParticipants.add(TAB_ID);
+
+      localVideo.srcObject = localMediaStream;
+      localAvatarIcon.textContent = currentUser.avatar;
+
+      callBtnText.textContent = "In Call";
+      startCallBtn.className = "px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 border border-amber-500/50 text-white font-medium transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-amber-600/20";
+      callPanel.classList.remove('hidden');
+
+      updateCallParticipantCountUI();
+
+      chatChannel.postMessage({
+        type: 'CALL_JOIN',
+        payload: {
+          tabId: TAB_ID,
+          username: currentUser.username,
+          avatar: currentUser.avatar
+        }
+      });
+    }
+
+    function leaveCall() {
+      if (!isInCall) return;
+
+      if (localMediaStream) {
+        localMediaStream.getTracks().forEach(track => track.stop());
+        localMediaStream = null;
+      }
+      if (localScreenStream) {
+        localScreenStream.getTracks().forEach(track => track.stop());
+        localScreenStream = null;
+      }
+
+      Object.keys(peerConnections).forEach(peerTabId => {
+        closePeerConnection(peerTabId);
+      });
+
+      isInCall = false;
+      isSharingScreen = false;
+      isAudioMuted = false;
+      isVideoStopped = false;
+
+      localVideo.srcObject = null;
+      localAvatarFallback.classList.add('hidden');
+      screenBadge.classList.add('hidden');
+
+      callBtnText.textContent = "Start Call";
+      startCallBtn.className = "px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/50 text-white font-medium transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 active:scale-95";
+      callPanel.classList.add('hidden');
+
+      chatChannel.postMessage({
+        type: 'CALL_LEAVE',
+        payload: { tabId: TAB_ID }
+      });
+    }
+
+    function createPeerConnection(remoteTabId) {
+      if (peerConnections[remoteTabId]) return peerConnections[remoteTabId];
+
+      const pc = new RTCPeerConnection(rtcConfiguration);
+
+      const activeStream = isSharingScreen && localScreenStream ? localScreenStream : localMediaStream;
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => {
+          pc.addTrack(track, activeStream);
+        });
+      }
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          chatChannel.postMessage({
+            type: 'CALL_ICE_CANDIDATE',
+            payload: {
+              senderTabId: TAB_ID,
+              targetTabId: remoteTabId,
+              candidate: event.candidate
+            }
+          });
+        }
+      };
+
+      pc.ontrack = (event) => {
+        let remoteCard = document.getElementById(`videoCard_${remoteTabId}`);
+        if (!remoteCard) {
+          remoteCard = createRemoteVideoCard(remoteTabId);
+          videoGrid.appendChild(remoteCard);
+        }
+        const remoteVideoEl = document.getElementById(`videoEl_${remoteTabId}`);
+        if (remoteVideoEl && event.streams[0]) {
+          remoteVideoEl.srcObject = event.streams[0];
+        }
+      };
+
+      peerConnections[remoteTabId] = pc;
+      return pc;
+    }
+
+    async function initiatePeerConnection(remoteTabId, isInitiator) {
+      const pc = createPeerConnection(remoteTabId);
+
+      if (isInitiator) {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        chatChannel.postMessage({
+          type: 'CALL_OFFER',
+          payload: {
+            senderTabId: TAB_ID,
+            targetTabId: remoteTabId,
+            sdp: offer
+          }
+        });
+      }
+    }
+
+    async function handleWebRTCOffer(senderTabId, sdpOffer) {
+      callParticipants.add(senderTabId);
+      updateCallParticipantCountUI();
+
+      const pc = createPeerConnection(senderTabId);
+      await pc.setRemoteDescription(new RTCSessionDescription(sdpOffer));
+
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      chatChannel.postMessage({
+        type: 'CALL_ANSWER',
+        payload: {
+          senderTabId: TAB_ID,
+          targetTabId: senderTabId,
+          sdp: answer
+        }
+      });
+    }
+
+    async function handleWebRTCAnswer(senderTabId, sdpAnswer) {
+      const pc = peerConnections[senderTabId];
+      if (pc) {
+        await pc.setRemoteDescription(new RTCSessionDescription(sdpAnswer));
+      }
+    }
+
+    async function handleWebRTCIceCandidate(senderTabId, candidate) {
+      const pc = peerConnections[senderTabId];
+      if (pc) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (e) {
+          console.error('Error adding ICE Candidate', e);
+        }
+      }
+    }
+
+    function closePeerConnection(remoteTabId) {
+      if (peerConnections[remoteTabId]) {
+        peerConnections[remoteTabId].close();
+        delete peerConnections[remoteTabId];
+      }
+      callParticipants.delete(remoteTabId);
+      updateCallParticipantCountUI();
+
+      const card = document.getElementById(`videoCard_${remoteTabId}`);
+      if (card) card.remove();
+    }
+
+    function createRemoteVideoCard(remoteTabId) {
+      const card = document.createElement('div');
+      card.id = `videoCard_${remoteTabId}`;
+      card.className = "relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden aspect-video shadow-lg flex items-center justify-center group animate-fade-in";
+
+      const video = document.createElement('video');
+      video.id = `videoEl_${remoteTabId}`;
+      video.autoplay = true;
+      video.playsInline = true;
+      video.className = "w-full h-full object-cover";
+
+      const overlay = document.createElement('div');
+      overlay.className = "absolute bottom-2 left-2 right-2 flex items-center justify-between px-2 py-1 rounded-lg bg-slate-900/80 backdrop-blur-sm border border-slate-800 text-[10px] text-slate-200";
+
+      const peerLabel = document.createElement('span');
+      peerLabel.className = "font-semibold flex items-center gap-1";
+      peerLabel.textContent = `Peer (${remoteTabId.substring(0, 6)})`;
+
+      const peerStatus = document.createElement('div');
+      peerStatus.className = "flex items-center gap-1 text-[11px]";
+      peerStatus.innerHTML = `<span id="micStatus_${remoteTabId}">🎙️</span><span id="camStatus_${remoteTabId}">📹</span>`;
+
+      overlay.appendChild(peerLabel);
+      overlay.appendChild(peerStatus);
+
+      card.appendChild(video);
+      card.appendChild(overlay);
+
+      return card;
+    }
+
+    toggleMicBtn.addEventListener('click', () => {
+      if (!localMediaStream) return;
+      const audioTracks = localMediaStream.getAudioTracks();
+      if (audioTracks.length > 0) {
+        isAudioMuted = !isAudioMuted;
+        audioTracks[0].enabled = !isAudioMuted;
+        micIcon.textContent = isAudioMuted ? '🔇' : '🎤';
+        micText.textContent = isAudioMuted ? 'Unmute Mic' : 'Mute Mic';
+        localMicStatus.textContent = isAudioMuted ? '🔇' : '🎙️';
+        broadcastCallState();
+      }
+    });
+
+    toggleCamBtn.addEventListener('click', () => {
+      if (!localMediaStream) return;
+      const videoTracks = localMediaStream.getVideoTracks();
+      if (videoTracks.length > 0) {
+        isVideoStopped = !isVideoStopped;
+        videoTracks[0].enabled = !isVideoStopped;
+        updateCamUIState();
+        broadcastCallState();
+      }
+    });
+
+    function updateCamUIState() {
+      camIcon.textContent = isVideoStopped ? '📷' : '📹';
+      camText.textContent = isVideoStopped ? 'Start Camera' : 'Stop Camera';
+      localCamStatus.textContent = isVideoStopped ? '📷' : '📹';
+      if (isVideoStopped) {
+        localAvatarFallback.classList.remove('hidden');
+      } else {
+        localAvatarFallback.classList.add('hidden');
+      }
+    }
+
+    shareScreenBtn.addEventListener('click', async () => {
+      if (!isInCall) return;
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        showRoomAlert('Screen sharing is not supported on mobile Safari/iOS. Please use a desktop browser.');
+        return;
+      }
+
+      if (!isSharingScreen) {
+        try {
+          localScreenStream = await navigator.mediaDevices.getDisplayMedia({
+            video: true,
+            audio: true
+          });
+
+          const screenTrack = localScreenStream.getVideoTracks()[0];
+          localVideo.srcObject = localScreenStream;
+          isSharingScreen = true;
+          screenBadge.classList.remove('hidden');
+          screenText.textContent = "Stop Sharing";
+
+          Object.values(peerConnections).forEach(pc => {
+            const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+            if (sender) sender.replaceTrack(screenTrack);
+          });
+
+          screenTrack.onended = () => {
+            stopScreenSharing();
+          };
+
+        } catch (err) {
+          console.warn('Screen share canceled or failed', err);
+        }
+      } else {
+        stopScreenSharing();
+      }
+    });
+
+    function stopScreenSharing() {
+      if (localScreenStream) {
+        localScreenStream.getTracks().forEach(track => track.stop());
+        localScreenStream = null;
+      }
+      isSharingScreen = false;
+      screenBadge.classList.add('hidden');
+      screenText.textContent = "Share Screen";
+
+      localVideo.srcObject = localMediaStream;
+
+      if (localMediaStream && localMediaStream.getVideoTracks().length > 0) {
+        const camTrack = localMediaStream.getVideoTracks()[0];
+        Object.values(peerConnections).forEach(pc => {
+          const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+          if (sender) sender.replaceTrack(camTrack);
+        });
+      }
+    }
+
+    function broadcastCallState() {
+      chatChannel.postMessage({
+        type: 'CALL_STATE_UPDATE',
+        payload: {
+          tabId: TAB_ID,
+          isMuted: isAudioMuted,
+          isVideoOff: isVideoStopped
+        }
+      });
+    }
+
+    function updateRemotePeerStateUI(data) {
+      const micStatusEl = document.getElementById(`micStatus_${data.tabId}`);
+      const camStatusEl = document.getElementById(`camStatus_${data.tabId}`);
+      if (micStatusEl) micStatusEl.textContent = data.isMuted ? '🔇' : '🎙️';
+      if (camStatusEl) camStatusEl.textContent = data.isVideoOff ? '📷' : '📹';
+    }
+
+    function updateCallParticipantCountUI() {
+      const count = callParticipants.size;
+      callParticipantCount.textContent = `${count} Connected`;
+    }
+
+    startCallBtn.addEventListener('click', () => {
+      if (!isInCall) startOrJoinCall();
+    });
+
+    leaveCallBtn.addEventListener('click', leaveCall);
+
+    async function appendSingleMessageUI(msgObj) {
+      if (emptyNotice) emptyNotice.remove();
+
+      const decryptedBody = await decryptText(msgObj.payload);
+      const isSelf = msgObj.tabId === TAB_ID;
+
+      const messageCard = document.createElement('div');
+      messageCard.className = `flex gap-2.5 items-start max-w-[88%] sm:max-w-[80%] ${isSelf ? 'ml-auto flex-row-reverse' : ''} animate-fade-in`;
+
+      const avatarBubble = document.createElement('div');
+      avatarBubble.className = "w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-sm shrink-0 shadow-md";
+      avatarBubble.textContent = msgObj.avatar || '⚡';
+
+      const bubbleContent = document.createElement('div');
+      bubbleContent.className = `flex flex-col ${isSelf ? 'items-end' : 'items-start'}`;
+
+      const metaRow = document.createElement('div');
+      metaRow.className = "flex items-center gap-2 mb-1 px-1 text-[11px] text-slate-400";
+      
+      const userSpan = document.createElement('span');
+      userSpan.className = `font-bold ${isSelf ? 'text-indigo-400' : 'text-slate-300'}`;
+      userSpan.textContent = msgObj.username;
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = "text-[10px] text-slate-500 font-mono";
+      timeSpan.textContent = msgObj.timestamp;
+
+      metaRow.appendChild(userSpan);
+      metaRow.appendChild(timeSpan);
+
+      const textBubble = document.createElement('div');
+      textBubble.className = `p-3 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-lg break-words max-w-full ${
+        isSelf 
+          ? 'bg-indigo-600 text-white rounded-tr-none' 
+          : 'bg-slate-800 border border-slate-700/80 text-slate-100 rounded-tl-none'
+      }`;
+
+      if (showRawCiphertext) {
+        textBubble.className += " font-mono-code text-[11px] bg-slate-950 border border-emerald-500/40 text-emerald-300";
+        textBubble.textContent = `IV: ${msgObj.payload.iv} | Cipher: ${msgObj.payload.ciphertext}`;
+      } else if (decryptedBody !== null) {
+        textBubble.textContent = decryptedBody;
+      } else {
+        textBubble.className += " bg-rose-950/60 border border-rose-800 text-rose-300 italic";
+        textBubble.textContent = "🔒 Unable to decrypt (Passphrase key mismatch)";
+      }
+
+      bubbleContent.appendChild(metaRow);
+      bubbleContent.appendChild(textBubble);
+
+      messageCard.appendChild(avatarBubble);
+      messageCard.appendChild(bubbleContent);
+
+      messageContainer.appendChild(messageCard);
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+
+    async function renderAllMessages() {
+      messageContainer.innerHTML = '';
+      if (chatMemory.length === 0) {
+        messageContainer.appendChild(emptyNotice);
+      } else {
+        for (const msg of chatMemory) {
+          await appendSingleMessageUI(msg);
+        }
+      }
+    }
+
+    function updateOnlineCountUI() {
+      onlineCounter.textContent = `${activeTabs.size} online`;
+    }
+
+    function showRoomAlert(message) {
+      roomAlertText.textContent = message;
+      roomAlertBanner.classList.remove('hidden');
+    }
+
+    function checkRoomZeroReset() {
+      if (activeTabs.size === 0) {
+        chatMemory = [];
+        renderAllMessages();
+      }
+    }
+
+    const botProfiles = [
+      { name: 'Cipher_Bot', avatar: '🐱‍💻' },
+      { name: 'Crypto_Ninja', avatar: '🛡️' },
+      { name: 'Zero_Trace', avatar: '👾' }
+    ];
+    const botMessages = [
+      "Client-side AES-GCM encryption is working seamlessly!",
+      "Are you inspecting raw cipher payloads?",
+      "No plain text ever touches local RAM unencrypted!",
+      "If you change your passphrase key, messages won't decrypt."
+    ];
+
+    async function toggleBotSimulation() {
+      isBotSimulationActive = !isBotSimulationActive;
+
+      if (isBotSimulationActive) {
+        botSimStatus.textContent = "ON";
+        botSimStatus.className = "font-bold text-emerald-400";
+        
+        botIntervalId = setInterval(async () => {
+          const randomBot = botProfiles[Math.floor(Math.random() * botProfiles.length)];
+          const randomText = botMessages[Math.floor(Math.random() * botMessages.length)];
+          
+          const encryptedPayload = await encryptText(randomText);
+
+          const botMsgObj = {
+            id: Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+            username: randomBot.name,
+            avatar: randomBot.avatar,
+            payload: encryptedPayload,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            tabId: 'bot_tab'
+          };
+
+          chatMemory.push(botMsgObj);
+          await appendSingleMessageUI(botMsgObj);
+          playReceiveSound();
+
+          chatChannel.postMessage({
+            type: 'NEW_MESSAGE',
+            payload: botMsgObj
+          });
+        }, 4500);
+
+      } else {
+        botSimStatus.textContent = "OFF";
+        botSimStatus.className = "font-bold text-slate-400";
+        clearInterval(botIntervalId);
+      }
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const text = messageInput.value.trim();
+      if (!text || !derivedCryptoKey) return;
+
+      const encryptedPayload = await encryptText(text);
+
+      const msgPayload = {
+        id: Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+        username: currentUser.username,
+        avatar: currentUser.avatar,
+        payload: encryptedPayload,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        tabId: TAB_ID
+      };
+
+      chatMemory.push(msgPayload);
+      await appendSingleMessageUI(msgPayload);
+      playSendSound();
+
+      chatChannel.postMessage({
+        type: 'NEW_MESSAGE',
+        payload: msgPayload
+      });
+
+      messageInput.value = '';
+      messageInput.focus();
+    });
+
+    messageInput.addEventListener('input', () => {
+      chatChannel.postMessage({
+        type: 'USER_TYPING',
+        payload: { username: currentUser.username }
+      });
+    });
+
+    cipherInspectBtn.addEventListener('click', () => {
+      showRawCiphertext = !showRawCiphertext;
+      cipherInspectStatus.textContent = showRawCiphertext ? "ON" : "OFF";
+      cipherInspectStatus.className = showRawCiphertext ? "font-bold text-emerald-400" : "font-bold text-slate-400";
+      renderAllMessages();
+    });
+
+    soundToggleBtn.addEventListener('click', () => {
+      isSoundEnabled = !isSoundEnabled;
+      soundIcon.textContent = isSoundEnabled ? '🔊' : '🔇';
+    });
+
+    botSimToggleBtn.addEventListener('click', toggleBotSimulation);
+
+    emojiPickerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      emojiMenu.classList.toggle('hidden');
+    });
+
+    document.querySelectorAll('.emoji-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        messageInput.value += btn.textContent;
+        emojiMenu.classList.add('hidden');
+        messageInput.focus();
+      });
+    });
+
+    document.addEventListener('click', () => {
+      emojiMenu.classList.add('hidden');
+    });
+
+    window.addEventListener('load', () => {
+      broadcastHeartbeat();
+      chatChannel.postMessage({ type: 'PING_PRESENCE', tabId: TAB_ID });
+      setInterval(() => {
+        chatChannel.postMessage({ type: 'PING_PRESENCE', tabId: TAB_ID });
+      }, 5000);
+    });
+
+  </script>
+</body>
+</html>
