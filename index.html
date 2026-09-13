@@ -4,7 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Global Ephemeral Encrypted Room</title>
+  
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- MQTT.js CDN for Global Serverless WebSocket Networking -->
+  <script src="https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js"></script>
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -68,17 +75,17 @@
       
       <div class="text-center space-y-2">
         <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-emerald-400 text-white font-bold text-2xl shadow-lg shadow-indigo-500/25 mb-1">
-          🔐
+          🌍
         </div>
-        <h2 class="text-2xl font-extrabold text-white tracking-tight">Create Profile & Room Key</h2>
-        <p class="text-xs text-slate-400">Set up your alias and room encryption key before entering the zero-trace RAM room.</p>
+        <h2 class="text-2xl font-extrabold text-white tracking-tight">Global Ephemeral Room</h2>
+        <p class="text-xs text-slate-400">Join a zero-trace real-time room. Works globally across devices on GitHub Pages.</p>
       </div>
 
       <form id="authForm" class="space-y-4">
         
         <!-- Username Input -->
         <div class="space-y-1.5">
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Your Username</label>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Your Alias</label>
           <div class="relative flex items-center">
             <span class="absolute left-3 text-slate-500 font-bold text-sm">@</span>
             <input 
@@ -92,7 +99,6 @@
           </div>
         </div>
 
-        <!-- Avatar Selection -->
         <div class="space-y-1.5">
           <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Choose Avatar Icon</label>
           <div class="grid grid-cols-6 gap-2" id="avatarSelector">
@@ -122,7 +128,7 @@
             />
             <button type="button" id="togglePassphraseVisibility" class="absolute right-3 text-slate-400 hover:text-white text-xs">👁️</button>
           </div>
-          <p class="text-[11px] text-slate-500">Only users with the exact same passphrase can decrypt and read room messages.</p>
+          <p class="text-[11px] text-slate-500">Matching passphrases connect users anywhere in the world into the same room.</p>
         </div>
 
         <!-- Submit Button -->
@@ -131,7 +137,7 @@
           id="enterChatBtn"
           class="w-full mt-2 bg-gradient-to-r from-indigo-600 via-violet-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-bold py-3 px-4 rounded-xl text-sm transition-all shadow-lg shadow-indigo-600/25 active:scale-[0.99] flex items-center justify-center gap-2 touch-manipulation cursor-pointer"
         >
-          <span>Initialize Key & Join Chat</span>
+          <span>Connect Globally</span>
           <span>→</span>
         </button>
       </form>
@@ -153,15 +159,15 @@
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-bold text-base sm:text-lg text-white tracking-tight">Encrypted Global Room</h1>
+            <h1 class="font-bold text-base sm:text-lg text-white tracking-tight">Global Encrypted Room</h1>
             <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-              <span>🔒</span> E2EE Active
+              <span>🌐</span> WSS Public Mesh
             </span>
           </div>
           <p class="text-xs text-slate-400 flex items-center gap-1.5">
-            <span>User: <strong id="headerUsername" class="text-indigo-300">Guest</strong></span>
+            <span>Alias: <strong id="headerUsername" class="text-indigo-300">Guest</strong></span>
             <span>•</span>
-            <span id="wipePolicyText" class="text-slate-400">RAM Wiped on 0 Users</span>
+            <span id="connectionStateBadge" class="text-amber-400 font-semibold">Connecting...</span>
           </p>
         </div>
       </div>
@@ -186,16 +192,15 @@
         </button>
 
         <!-- Call Toggle Button -->
-        <button id="startCallBtn" title="Start or Join Ephemeral Video/Audio Call" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/50 text-white font-medium transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 active:scale-95">
+        <button id="startCallBtn" title="Start or Join Global Video/Audio Call" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/50 text-white font-medium transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 active:scale-95">
           <span id="callBtnIcon">📞</span>
           <span id="callBtnText" class="hidden sm:inline font-bold">Start Call</span>
         </button>
 
-        <!-- Simulated Active Bot Chatter -->
-        <button id="botSimToggleBtn" title="Toggle active chatter simulation" class="px-3 py-1.5 rounded-xl bg-indigo-950/60 hover:bg-indigo-900/80 border border-indigo-800/50 text-indigo-300 hover:text-white transition-all text-xs font-medium flex items-center gap-1.5">
-          <span>🤖</span>
-          <span class="hidden sm:inline">Bot Simulator:</span>
-          <span id="botSimStatus" class="font-bold text-slate-400">OFF</span>
+        <!-- GitHub Deploy Help Button -->
+        <button id="githubDeployBtn" title="How to host on GitHub Pages" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/80 text-slate-300 hover:text-white transition-all text-xs font-medium flex items-center gap-1">
+          <span>🐙</span>
+          <span class="hidden lg:inline">GitHub Pages</span>
         </button>
 
         <!-- Change User / Key Button -->
@@ -215,12 +220,12 @@
             <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
           </span>
           <h3 class="font-bold text-xs sm:text-sm text-slate-100 flex items-center gap-1.5">
-            <span>📹 Encrypted Ephemeral Call</span>
+            <span>📹 Global Encrypted Call</span>
             <span id="callParticipantCount" class="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">1 Connected</span>
           </h3>
         </div>
         <div class="text-[11px] text-slate-400 font-mono" id="screenShareStatus">
-          🔒 Peer-to-Peer WebRTC
+          🔒 Global WebRTC Peer Connection
         </div>
       </div>
 
@@ -231,7 +236,7 @@
         <div id="localVideoCard" class="relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden aspect-video shadow-lg flex items-center justify-center group">
           <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
           
-          <!-- Avatar Fallback (When camera is off) -->
+          <!-- Avatar Fallback -->
           <div id="localAvatarFallback" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-slate-400 space-y-1">
             <span id="localAvatarIcon" class="text-3xl">⚡</span>
             <span class="text-[11px] font-semibold text-slate-300">Camera Off</span>
@@ -252,33 +257,27 @@
 
       </div>
 
-      <!-- Call Action Control Dock -->
+      <!-- Call Action Controls -->
       <div class="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
-        
-        <!-- Toggle Microphone -->
         <button id="toggleMicBtn" class="p-2.5 sm:px-4 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95">
           <span id="micIcon">🎤</span>
           <span id="micText" class="hidden sm:inline">Mute Mic</span>
         </button>
 
-        <!-- Toggle Camera -->
         <button id="toggleCamBtn" class="p-2.5 sm:px-4 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95">
           <span id="camIcon">📹</span>
           <span id="camText" class="hidden sm:inline">Stop Camera</span>
         </button>
 
-        <!-- Share Screen -->
         <button id="shareScreenBtn" class="p-2.5 sm:px-4 sm:py-2 rounded-xl bg-indigo-900/50 hover:bg-indigo-800/70 border border-indigo-700/60 text-indigo-200 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95">
           <span>🖥️</span>
           <span id="screenText" class="hidden sm:inline">Share Screen</span>
         </button>
 
-        <!-- Leave Call -->
         <button id="leaveCallBtn" class="p-2.5 sm:px-4 sm:py-2 rounded-xl bg-rose-600/80 hover:bg-rose-500 border border-rose-500/80 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-lg shadow-rose-600/20 active:scale-95">
           <span>📞</span>
           <span class="hidden sm:inline">Leave Call</span>
         </button>
-
       </div>
     </div>
 
@@ -288,7 +287,7 @@
       <div id="roomAlertBanner" class="hidden transition-all duration-300 mb-3 p-2.5 px-4 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-xl text-xs flex items-center justify-between gap-2">
         <div class="flex items-center gap-2">
           <span class="text-amber-400">🧹</span>
-          <span id="roomAlertText">The last user left. RAM memory & keys have been completely wiped!</span>
+          <span id="roomAlertText">The room was reset. In-memory storage has been cleared.</span>
         </div>
         <button onclick="this.parentElement.classList.add('hidden')" class="text-amber-400 hover:text-white">✕</button>
       </div>
@@ -302,8 +301,8 @@
             🔒
           </div>
           <div class="max-w-xs">
-            <p class="font-semibold text-slate-300 text-sm">Room RAM is Empty</p>
-            <p class="text-xs text-slate-500 mt-1">All messages are encrypted client-side using AES-GCM 256-bit before leaving your browser.</p>
+            <p class="font-semibold text-slate-300 text-sm">Room Storage is Clear</p>
+            <p class="text-xs text-slate-500 mt-1">Messages are encrypted client-side with AES-GCM 256-bit and synced live across the global WebSocket mesh.</p>
           </div>
         </div>
 
@@ -318,11 +317,6 @@
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 typing-dot"></span>
         </div>
       </div>
-
-      <!-- Scroll to Bottom Button -->
-      <button id="scrollToBottomBtn" class="hidden absolute bottom-4 right-6 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-full shadow-xl transition-all items-center gap-2 z-10 animate-bounce">
-        <span>↓ New messages</span>
-      </button>
 
     </main>
 
@@ -363,7 +357,7 @@
           <button 
             type="submit" 
             id="sendBtn"
-            class="bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all shadow-md flex items-center gap-1.5 shrink-0 active:scale-95"
+            class="bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all shadow-md flex items-center gap-1.5 shrink-0 active:scale-95 cursor-pointer"
           >
             <span>Encrypt & Send</span>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -378,8 +372,36 @@
 
   </div>
 
+  <div id="githubModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl relative space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <span>🐙</span> Host on GitHub Pages
+        </h3>
+        <button id="closeGithubModal" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+        <p>This application is <strong>100% serverless</strong> and designed to run directly from GitHub Pages without any backend!</p>
+        
+        <ol class="list-decimal list-inside space-y-2 text-slate-400 font-mono">
+          <li>Create a new repository on <strong class="text-indigo-400">GitHub.com</strong>.</li>
+          <li>Upload this single file as <strong class="text-emerald-400">index.html</strong>.</li>
+          <li>Go to <strong>Settings</strong> &rarr; <strong>Pages</strong>.</li>
+          <li>Select <strong class="text-indigo-300">main</strong> branch & click <strong>Save</strong>.</li>
+        </ol>
+
+        <p class="text-slate-400 pt-1">Once published, share your GitHub Pages URL with anyone. When you both enter the same passphrase, you will connect instantly!</p>
+      </div>
+
+      <button id="gotItGithubBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-xs">
+        Got it!
+      </button>
+    </div>
+  </div>
+
   <script>
-    const TAB_ID = 'tab_' + Math.random().toString(36).substring(2, 9);
+    const CLIENT_ID = 'user_' + Math.random().toString(36).substring(2, 9);
     
     let currentUser = {
       username: 'Guest_User',
@@ -388,24 +410,22 @@
     };
 
     let derivedCryptoKey = null; // Web Crypto AES-GCM Key
-    let chatMemory = []; // In-memory store (holds encrypted payloads)
-    let activeTabs = new Set([TAB_ID]);
+    let roomTopicHash = ''; // SHA-256 derived MQTT topic prefix
+    let mqttClient = null; // Global MQTT client instance
+    let activeGlobalPeers = new Map(); // Track connected global peer heartbeats
     let isSoundEnabled = true;
-    let isBotSimulationActive = false;
     let showRawCiphertext = false;
-    let botIntervalId = null;
 
-    // WebRTC Call State Variables
+    // WebRTC Global State
     let isInCall = false;
     let isAudioMuted = false;
     let isVideoStopped = false;
     let isSharingScreen = false;
     let localMediaStream = null;
     let localScreenStream = null;
-    let peerConnections = {}; // Map of tabId -> RTCPeerConnection
-    let callParticipants = new Set(); // Active tabs in the call
+    let peerConnections = {}; 
+    let callParticipants = new Set(); 
 
-    // STUN Servers for WebRTC Peer Connections
     const rtcConfiguration = {
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
@@ -413,10 +433,8 @@
       ]
     };
 
-    // DOM References (Declared once cleanly)
     const authOverlay = document.getElementById('authOverlay');
     const authForm = document.getElementById('authForm');
-    const enterChatBtn = document.getElementById('enterChatBtn');
     const setupUsername = document.getElementById('setupUsername');
     const setupPassphrase = document.getElementById('setupPassphrase');
     const togglePassphraseVisibility = document.getElementById('togglePassphraseVisibility');
@@ -424,6 +442,7 @@
     const mainChatApp = document.getElementById('mainChatApp');
     const headerAvatar = document.getElementById('headerAvatar');
     const headerUsername = document.getElementById('headerUsername');
+    const connectionStateBadge = document.getElementById('connectionStateBadge');
     const reauthBtn = document.getElementById('reauthBtn');
     
     const messageContainer = document.getElementById('messageContainer');
@@ -435,8 +454,6 @@
     const roomAlertText = document.getElementById('roomAlertText');
     const soundToggleBtn = document.getElementById('soundToggleBtn');
     const soundIcon = document.getElementById('soundIcon');
-    const botSimToggleBtn = document.getElementById('botSimToggleBtn');
-    const botSimStatus = document.getElementById('botSimStatus');
     const cipherInspectBtn = document.getElementById('cipherInspectBtn');
     const cipherInspectStatus = document.getElementById('cipherInspectStatus');
     const emojiPickerBtn = document.getElementById('emojiPickerBtn');
@@ -444,9 +461,13 @@
     const typingIndicator = document.getElementById('typingIndicator');
     const typingUserText = document.getElementById('typingUserText');
 
+    const githubDeployBtn = document.getElementById('githubDeployBtn');
+    const githubModal = document.getElementById('githubModal');
+    const closeGithubModal = document.getElementById('closeGithubModal');
+    const gotItGithubBtn = document.getElementById('gotItGithubBtn');
+
     // Call UI DOM References
     const startCallBtn = document.getElementById('startCallBtn');
-    const callBtnIcon = document.getElementById('callBtnIcon');
     const callBtnText = document.getElementById('callBtnText');
     const callPanel = document.getElementById('callPanel');
     const videoGrid = document.getElementById('videoGrid');
@@ -467,33 +488,29 @@
     const screenText = document.getElementById('screenText');
     const leaveCallBtn = document.getElementById('leaveCallBtn');
 
+    async function hashStringSHA256(str) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(str);
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     async function generateAESKeyFromPassphrase(passphrase) {
-      if (!window.crypto || !window.crypto.subtle) {
-        console.warn("Web Crypto API unavailable in current context. Using fallback key structure.");
-        return { isFallback: true, passphrase };
-      }
-      try {
-        const encoder = new TextEncoder();
-        const passphraseBuffer = encoder.encode(passphrase);
-        const keyHash = await window.crypto.subtle.digest('SHA-256', passphraseBuffer);
-        return await window.crypto.subtle.importKey(
-          'raw',
-          keyHash,
-          { name: 'AES-GCM', length: 256 },
-          false,
-          ['encrypt', 'decrypt']
-        );
-      } catch (err) {
-        console.error("Key generation fallback:", err);
-        return { isFallback: true, passphrase };
-      }
+      const encoder = new TextEncoder();
+      const passphraseBuffer = encoder.encode(passphrase);
+      const keyHash = await window.crypto.subtle.digest('SHA-256', passphraseBuffer);
+      return await window.crypto.subtle.importKey(
+        'raw',
+        keyHash,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      );
     }
 
     async function encryptText(plaintext) {
       if (!derivedCryptoKey) return null;
-      if (derivedCryptoKey.isFallback) {
-        return { iv: 'FALLBACK_IV', ciphertext: btoa(encodeURIComponent(plaintext)) };
-      }
       try {
         const encoder = new TextEncoder();
         const encodedText = encoder.encode(plaintext);
@@ -508,17 +525,12 @@
           ciphertext: btoa(String.fromCharCode(...new Uint8Array(encryptedBuffer)))
         };
       } catch (e) {
-        return { iv: 'FALLBACK_IV', ciphertext: btoa(encodeURIComponent(plaintext)) };
+        return null;
       }
     }
 
     async function decryptText(encryptedPayload) {
       if (!derivedCryptoKey || !encryptedPayload) return null;
-      if (derivedCryptoKey.isFallback || encryptedPayload.iv === 'FALLBACK_IV') {
-        try {
-          return decodeURIComponent(atob(encryptedPayload.ciphertext));
-        } catch(e) { return null; }
-      }
       try {
         const iv = Uint8Array.from(atob(encryptedPayload.iv), c => c.charCodeAt(0));
         const ciphertext = Uint8Array.from(atob(encryptedPayload.ciphertext), c => c.charCodeAt(0));
@@ -555,7 +567,6 @@
 
     function playSendSound() { playTone(750, 'sine', 0.15, 0.1); }
     function playReceiveSound() { playTone(920, 'sine', 0.2, 0.12); }
-    function playWipeSound() { playTone(200, 'sawtooth', 0.45, 0.15); }
 
     if (togglePassphraseVisibility) {
       togglePassphraseVisibility.addEventListener('click', () => {
@@ -571,6 +582,117 @@
       });
     });
 
+    async function initializeGlobalMQTTConnection() {
+      if (mqttClient) {
+        mqttClient.end();
+      }
+
+      connectionStateBadge.textContent = "Connecting...";
+      connectionStateBadge.className = "text-amber-400 font-semibold";
+
+      const fullHash = await hashStringSHA256(currentUser.passphrase);
+      roomTopicHash = fullHash.substring(0, 16);
+
+      const topicRoom = `global_ephemeral_room_${roomTopicHash}/#`;
+
+      // Public WSS Brokers with fallback
+      const brokerUrl = 'wss://broker.emqx.io:8084/mqtt';
+
+      mqttClient = mqtt.connect(brokerUrl, {
+        clientId: CLIENT_ID,
+        clean: true,
+        reconnectPeriod: 3000
+      });
+
+      mqttClient.on('connect', () => {
+        connectionStateBadge.textContent = "Global Sync Active";
+        connectionStateBadge.className = "text-emerald-400 font-semibold";
+
+        mqttClient.subscribe(topicRoom, (err) => {
+          if (!err) {
+            broadcastPresence();
+          }
+        });
+      });
+
+      mqttClient.on('error', (err) => {
+        console.warn('MQTT connection warning:', err);
+        connectionStateBadge.textContent = "Reconnecting...";
+        connectionStateBadge.className = "text-rose-400 font-semibold";
+      });
+
+      mqttClient.on('message', async (topic, message) => {
+        try {
+          const data = JSON.parse(message.toString());
+          handleIncomingGlobalMessage(topic, data);
+        } catch (e) {}
+      });
+    }
+
+    function publishGlobalEvent(subTopic, payload) {
+      if (!mqttClient || !mqttClient.connected) return;
+      const fullTopic = `global_ephemeral_room_${roomTopicHash}/${subTopic}`;
+      mqttClient.publish(fullTopic, JSON.stringify({
+        senderId: CLIENT_ID,
+        payload: payload
+      }));
+    }
+
+    function broadcastPresence() {
+      publishGlobalEvent('presence', {
+        username: currentUser.username,
+        avatar: currentUser.avatar,
+        timestamp: Date.now()
+      });
+    }
+
+    async function handleIncomingGlobalMessage(topic, packet) {
+      if (packet.senderId === CLIENT_ID) return;
+
+      const subTopic = topic.split('/').pop();
+      const { senderId, payload } = packet;
+
+      switch (subTopic) {
+        case 'presence':
+          activeGlobalPeers.set(senderId, Date.now());
+          updateOnlineCountUI();
+          break;
+
+        case 'chat':
+          await appendSingleMessageUI(payload, false);
+          playReceiveSound();
+          break;
+
+        case 'typing':
+          showTypingIndicatorUI(payload.username);
+          break;
+
+        case 'call_signal':
+          if (payload.targetId === CLIENT_ID) {
+            handleCallSignalPayload(senderId, payload);
+          }
+          break;
+      }
+    }
+
+    setInterval(() => {
+      const now = Date.now();
+      activeGlobalPeers.forEach((lastSeen, peerId) => {
+        if (now - lastSeen > 12000) {
+          activeGlobalPeers.delete(peerId);
+        }
+      });
+      updateOnlineCountUI();
+      if (mqttClient && mqttClient.connected) {
+        broadcastPresence();
+      }
+    }, 5000);
+
+    function updateOnlineCountUI() {
+      const count = activeGlobalPeers.size + 1;
+      onlineCounter.textContent = `${count} online`;
+    }
+
     async function handleInitialization(e) {
       if (e) e.preventDefault();
       
@@ -582,11 +704,7 @@
       currentUser.username = username;
       currentUser.passphrase = passphrase;
 
-      try {
-        derivedCryptoKey = await generateAESKeyFromPassphrase(passphrase);
-      } catch(err) {
-        console.error("Crypto init error:", err);
-      }
+      derivedCryptoKey = await generateAESKeyFromPassphrase(passphrase);
 
       if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume();
@@ -598,7 +716,7 @@
       authOverlay.classList.add('hidden');
       mainChatApp.classList.remove('opacity-40', 'pointer-events-none');
 
-      renderAllMessages();
+      await initializeGlobalMQTTConnection();
     }
 
     authForm.addEventListener('submit', handleInitialization);
@@ -607,115 +725,6 @@
       authOverlay.classList.remove('hidden');
       mainChatApp.classList.add('opacity-40', 'pointer-events-none');
     });
-
-    const chatChannel = new BroadcastChannel('global_ephemeral_encrypted_channel');
-
-    function broadcastHeartbeat() {
-      chatChannel.postMessage({
-        type: 'HEARTBEAT',
-        tabId: TAB_ID,
-        history: chatMemory
-      });
-    }
-
-    chatChannel.onmessage = async (event) => {
-      const { type, payload, tabId, history } = event.data;
-
-      switch (type) {
-        case 'HEARTBEAT':
-          if (tabId && !activeTabs.has(tabId)) {
-            activeTabs.add(tabId);
-            updateOnlineCountUI();
-          }
-          if (history && history.length > chatMemory.length) {
-            chatMemory = history;
-            renderAllMessages();
-          }
-          break;
-
-        case 'PING_PRESENCE':
-          activeTabs.add(tabId);
-          updateOnlineCountUI();
-          chatChannel.postMessage({
-            type: 'PONG_PRESENCE',
-            tabId: TAB_ID,
-            history: chatMemory
-          });
-          break;
-
-        case 'PONG_PRESENCE':
-          activeTabs.add(tabId);
-          updateOnlineCountUI();
-          if (history && history.length > chatMemory.length) {
-            chatMemory = history;
-            renderAllMessages();
-          }
-          break;
-
-        case 'NEW_MESSAGE':
-          chatMemory.push(payload);
-          await appendSingleMessageUI(payload);
-          playReceiveSound();
-          break;
-
-        case 'TAB_LEAVING':
-          if (tabId) {
-            activeTabs.delete(tabId);
-            updateOnlineCountUI();
-            checkRoomZeroReset();
-          }
-          break;
-
-        case 'USER_TYPING':
-          showTypingIndicatorUI(payload.username);
-          break;
-
-        case 'ROOM_WIPED':
-          chatMemory = [];
-          renderAllMessages();
-          showRoomAlert('The last user left the room. In-memory encrypted messages have been wiped!');
-          playWipeSound();
-          break;
-
-        case 'CALL_JOIN':
-          if (isInCall && payload.tabId !== TAB_ID) {
-            callParticipants.add(payload.tabId);
-            updateCallParticipantCountUI();
-            initiatePeerConnection(payload.tabId, true);
-          }
-          break;
-
-        case 'CALL_LEAVE':
-          if (payload.tabId !== TAB_ID) {
-            closePeerConnection(payload.tabId);
-          }
-          break;
-
-        case 'CALL_OFFER':
-          if (isInCall && payload.targetTabId === TAB_ID) {
-            handleWebRTCOffer(payload.senderTabId, payload.sdp);
-          }
-          break;
-
-        case 'CALL_ANSWER':
-          if (isInCall && payload.targetTabId === TAB_ID) {
-            handleWebRTCAnswer(payload.senderTabId, payload.sdp);
-          }
-          break;
-
-        case 'CALL_ICE_CANDIDATE':
-          if (isInCall && payload.targetTabId === TAB_ID) {
-            handleWebRTCIceCandidate(payload.senderTabId, payload.candidate);
-          }
-          break;
-
-        case 'CALL_STATE_UPDATE':
-          if (isInCall && payload.tabId !== TAB_ID) {
-            updateRemotePeerStateUI(payload);
-          }
-          break;
-      }
-    };
 
     async function startOrJoinCall() {
       if (isInCall) return;
@@ -726,7 +735,6 @@
           audio: true
         });
       } catch (err) {
-        console.warn('Camera access fallback to audio-only...', err);
         try {
           localMediaStream = await navigator.mediaDevices.getUserMedia({
             video: false,
@@ -735,13 +743,13 @@
           isVideoStopped = true;
           updateCamUIState();
         } catch (audioErr) {
-          showRoomAlert('Unable to access camera or microphone. Please check browser permissions.');
+          alert('Unable to access camera or microphone. Please check browser permissions.');
           return;
         }
       }
 
       isInCall = true;
-      callParticipants.add(TAB_ID);
+      callParticipants.add(CLIENT_ID);
 
       localVideo.srcObject = localMediaStream;
       localAvatarIcon.textContent = currentUser.avatar;
@@ -752,13 +760,8 @@
 
       updateCallParticipantCountUI();
 
-      chatChannel.postMessage({
-        type: 'CALL_JOIN',
-        payload: {
-          tabId: TAB_ID,
-          username: currentUser.username,
-          avatar: currentUser.avatar
-        }
+      activeGlobalPeers.forEach((_, peerId) => {
+        initiatePeerConnection(peerId, true);
       });
     }
 
@@ -774,8 +777,8 @@
         localScreenStream = null;
       }
 
-      Object.keys(peerConnections).forEach(peerTabId => {
-        closePeerConnection(peerTabId);
+      Object.keys(peerConnections).forEach(peerId => {
+        closePeerConnection(peerId);
       });
 
       isInCall = false;
@@ -790,15 +793,10 @@
       callBtnText.textContent = "Start Call";
       startCallBtn.className = "px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/50 text-white font-medium transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 active:scale-95";
       callPanel.classList.add('hidden');
-
-      chatChannel.postMessage({
-        type: 'CALL_LEAVE',
-        payload: { tabId: TAB_ID }
-      });
     }
 
-    function createPeerConnection(remoteTabId) {
-      if (peerConnections[remoteTabId]) return peerConnections[remoteTabId];
+    function createPeerConnection(remotePeerId) {
+      if (peerConnections[remotePeerId]) return peerConnections[remotePeerId];
 
       const pc = new RTCPeerConnection(rtcConfiguration);
 
@@ -811,108 +809,97 @@
 
       pc.onicecandidate = (event) => {
         if (event.candidate) {
-          chatChannel.postMessage({
-            type: 'CALL_ICE_CANDIDATE',
-            payload: {
-              senderTabId: TAB_ID,
-              targetTabId: remoteTabId,
-              candidate: event.candidate
-            }
+          publishGlobalEvent('call_signal', {
+            targetId: remotePeerId,
+            type: 'candidate',
+            candidate: event.candidate
           });
         }
       };
 
       pc.ontrack = (event) => {
-        let remoteCard = document.getElementById(`videoCard_${remoteTabId}`);
+        let remoteCard = document.getElementById(`videoCard_${remotePeerId}`);
         if (!remoteCard) {
-          remoteCard = createRemoteVideoCard(remoteTabId);
+          remoteCard = createRemoteVideoCard(remotePeerId);
           videoGrid.appendChild(remoteCard);
         }
-        const remoteVideoEl = document.getElementById(`videoEl_${remoteTabId}`);
+        const remoteVideoEl = document.getElementById(`videoEl_${remotePeerId}`);
         if (remoteVideoEl && event.streams[0]) {
           remoteVideoEl.srcObject = event.streams[0];
         }
       };
 
-      peerConnections[remoteTabId] = pc;
+      peerConnections[remotePeerId] = pc;
       return pc;
     }
 
-    async function initiatePeerConnection(remoteTabId, isInitiator) {
-      const pc = createPeerConnection(remoteTabId);
+    async function initiatePeerConnection(remotePeerId, isInitiator) {
+      const pc = createPeerConnection(remotePeerId);
 
       if (isInitiator) {
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
 
-        chatChannel.postMessage({
-          type: 'CALL_OFFER',
-          payload: {
-            senderTabId: TAB_ID,
-            targetTabId: remoteTabId,
-            sdp: offer
-          }
+        publishGlobalEvent('call_signal', {
+          targetId: remotePeerId,
+          type: 'offer',
+          sdp: offer
         });
       }
     }
 
-    async function handleWebRTCOffer(senderTabId, sdpOffer) {
-      callParticipants.add(senderTabId);
+    async function handleCallSignalPayload(senderId, signal) {
+      if (!isInCall) return;
+
+      callParticipants.add(senderId);
       updateCallParticipantCountUI();
 
-      const pc = createPeerConnection(senderTabId);
-      await pc.setRemoteDescription(new RTCSessionDescription(sdpOffer));
+      if (signal.type === 'offer') {
+        const pc = createPeerConnection(senderId);
+        await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
 
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
 
-      chatChannel.postMessage({
-        type: 'CALL_ANSWER',
-        payload: {
-          senderTabId: TAB_ID,
-          targetTabId: senderTabId,
+        publishGlobalEvent('call_signal', {
+          targetId: senderId,
+          type: 'answer',
           sdp: answer
+        });
+      } else if (signal.type === 'answer') {
+        const pc = peerConnections[senderId];
+        if (pc) {
+          await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
         }
-      });
-    }
-
-    async function handleWebRTCAnswer(senderTabId, sdpAnswer) {
-      const pc = peerConnections[senderTabId];
-      if (pc) {
-        await pc.setRemoteDescription(new RTCSessionDescription(sdpAnswer));
-      }
-    }
-
-    async function handleWebRTCIceCandidate(senderTabId, candidate) {
-      const pc = peerConnections[senderTabId];
-      if (pc) {
-        try {
-          await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (e) {
-          console.error('Error adding ICE Candidate', e);
+      } else if (signal.type === 'candidate') {
+        const pc = peerConnections[senderId];
+        if (pc) {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
+          } catch (e) {}
         }
       }
     }
 
-    function closePeerConnection(remoteTabId) {
-      if (peerConnections[remoteTabId]) {
-        peerConnections[remoteTabId].close();
-        delete peerConnections[remoteTabId];
+    function closePeerConnection(remotePeerId) {
+      if (peerConnections[remotePeerId]) {
+        peerConnections[remotePeerId].close();
+        delete peerConnections[remotePeerId];
       }
-      callParticipants.delete(remoteTabId);
+      callParticipants.delete(remotePeerId);
       updateCallParticipantCountUI();
 
-      const card = document.getElementById(`videoCard_${remoteTabId}`);
+      const card = document.getElementById(`videoCard_${remotePeerId}`);
       if (card) card.remove();
     }
 
-    function createRemoteVideoCard(remoteTabId) {
+    function createRemoteVideoCard(remotePeerId) {
       const card = document.createElement('div');
-      card.id = `videoCard_${remoteTabId}`;
+      card.id = `videoCard_${remotePeerId}`;
       card.className = "relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden aspect-video shadow-lg flex items-center justify-center group animate-fade-in";
 
       const video = document.createElement('video');
-      video.id = `videoEl_${remoteTabId}`;
+      video.id = `videoEl_${remotePeerId}`;
       video.autoplay = true;
       video.playsInline = true;
       video.className = "w-full h-full object-cover";
@@ -922,15 +909,9 @@
 
       const peerLabel = document.createElement('span');
       peerLabel.className = "font-semibold flex items-center gap-1";
-      peerLabel.textContent = `Peer (${remoteTabId.substring(0, 6)})`;
-
-      const peerStatus = document.createElement('div');
-      peerStatus.className = "flex items-center gap-1 text-[11px]";
-      peerStatus.innerHTML = `<span id="micStatus_${remoteTabId}">🎙️</span><span id="camStatus_${remoteTabId}">📹</span>`;
+      peerLabel.textContent = `Peer (${remotePeerId.substring(5, 9)})`;
 
       overlay.appendChild(peerLabel);
-      overlay.appendChild(peerStatus);
-
       card.appendChild(video);
       card.appendChild(overlay);
 
@@ -946,7 +927,6 @@
         micIcon.textContent = isAudioMuted ? '🔇' : '🎤';
         micText.textContent = isAudioMuted ? 'Unmute Mic' : 'Mute Mic';
         localMicStatus.textContent = isAudioMuted ? '🔇' : '🎙️';
-        broadcastCallState();
       }
     });
 
@@ -957,7 +937,6 @@
         isVideoStopped = !isVideoStopped;
         videoTracks[0].enabled = !isVideoStopped;
         updateCamUIState();
-        broadcastCallState();
       }
     });
 
@@ -976,7 +955,7 @@
       if (!isInCall) return;
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-        showRoomAlert('Screen sharing is not supported on mobile Safari/iOS. Please use a desktop browser.');
+        alert('Screen sharing is not supported on mobile Safari/iOS.');
         return;
       }
 
@@ -1002,9 +981,7 @@
             stopScreenSharing();
           };
 
-        } catch (err) {
-          console.warn('Screen share canceled or failed', err);
-        }
+        } catch (err) {}
       } else {
         stopScreenSharing();
       }
@@ -1030,27 +1007,8 @@
       }
     }
 
-    function broadcastCallState() {
-      chatChannel.postMessage({
-        type: 'CALL_STATE_UPDATE',
-        payload: {
-          tabId: TAB_ID,
-          isMuted: isAudioMuted,
-          isVideoOff: isVideoStopped
-        }
-      });
-    }
-
-    function updateRemotePeerStateUI(data) {
-      const micStatusEl = document.getElementById(`micStatus_${data.tabId}`);
-      const camStatusEl = document.getElementById(`camStatus_${data.tabId}`);
-      if (micStatusEl) micStatusEl.textContent = data.isMuted ? '🔇' : '🎙️';
-      if (camStatusEl) camStatusEl.textContent = data.isVideoOff ? '📷' : '📹';
-    }
-
     function updateCallParticipantCountUI() {
-      const count = callParticipants.size;
-      callParticipantCount.textContent = `${count} Connected`;
+      callParticipantCount.textContent = `${callParticipants.size} Connected`;
     }
 
     startCallBtn.addEventListener('click', () => {
@@ -1059,11 +1017,10 @@
 
     leaveCallBtn.addEventListener('click', leaveCall);
 
-    async function appendSingleMessageUI(msgObj) {
+    async function appendSingleMessageUI(msgObj, isSelf) {
       if (emptyNotice) emptyNotice.remove();
 
       const decryptedBody = await decryptText(msgObj.payload);
-      const isSelf = msgObj.tabId === TAB_ID;
 
       const messageCard = document.createElement('div');
       messageCard.className = `flex gap-2.5 items-start max-w-[88%] sm:max-w-[80%] ${isSelf ? 'ml-auto flex-row-reverse' : ''} animate-fade-in`;
@@ -1116,82 +1073,15 @@
       messageContainer.scrollTop = messageContainer.scrollHeight;
     }
 
-    async function renderAllMessages() {
-      messageContainer.innerHTML = '';
-      if (chatMemory.length === 0) {
-        messageContainer.appendChild(emptyNotice);
-      } else {
-        for (const msg of chatMemory) {
-          await appendSingleMessageUI(msg);
-        }
-      }
-    }
-
-    function updateOnlineCountUI() {
-      onlineCounter.textContent = `${activeTabs.size} online`;
-    }
-
-    function showRoomAlert(message) {
-      roomAlertText.textContent = message;
-      roomAlertBanner.classList.remove('hidden');
-    }
-
-    function checkRoomZeroReset() {
-      if (activeTabs.size === 0) {
-        chatMemory = [];
-        renderAllMessages();
-      }
-    }
-
-    const botProfiles = [
-      { name: 'Cipher_Bot', avatar: '🐱‍💻' },
-      { name: 'Crypto_Ninja', avatar: '🛡️' },
-      { name: 'Zero_Trace', avatar: '👾' }
-    ];
-    const botMessages = [
-      "Client-side AES-GCM encryption is working seamlessly!",
-      "Are you inspecting raw cipher payloads?",
-      "No plain text ever touches local RAM unencrypted!",
-      "If you change your passphrase key, messages won't decrypt."
-    ];
-
-    async function toggleBotSimulation() {
-      isBotSimulationActive = !isBotSimulationActive;
-
-      if (isBotSimulationActive) {
-        botSimStatus.textContent = "ON";
-        botSimStatus.className = "font-bold text-emerald-400";
-        
-        botIntervalId = setInterval(async () => {
-          const randomBot = botProfiles[Math.floor(Math.random() * botProfiles.length)];
-          const randomText = botMessages[Math.floor(Math.random() * botMessages.length)];
-          
-          const encryptedPayload = await encryptText(randomText);
-
-          const botMsgObj = {
-            id: Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-            username: randomBot.name,
-            avatar: randomBot.avatar,
-            payload: encryptedPayload,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            tabId: 'bot_tab'
-          };
-
-          chatMemory.push(botMsgObj);
-          await appendSingleMessageUI(botMsgObj);
-          playReceiveSound();
-
-          chatChannel.postMessage({
-            type: 'NEW_MESSAGE',
-            payload: botMsgObj
-          });
-        }, 4500);
-
-      } else {
-        botSimStatus.textContent = "OFF";
-        botSimStatus.className = "font-bold text-slate-400";
-        clearInterval(botIntervalId);
-      }
+    function showTypingIndicatorUI(name) {
+      typingUserText.textContent = name;
+      typingIndicator.classList.remove('hidden');
+      typingIndicator.classList.add('flex');
+      clearTimeout(window.typingTimeout);
+      window.typingTimeout = setTimeout(() => {
+        typingIndicator.classList.add('hidden');
+        typingIndicator.classList.remove('flex');
+      }, 3000);
     }
 
     chatForm.addEventListener('submit', async (e) => {
@@ -1207,43 +1097,32 @@
         username: currentUser.username,
         avatar: currentUser.avatar,
         payload: encryptedPayload,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        tabId: TAB_ID
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
-      chatMemory.push(msgPayload);
-      await appendSingleMessageUI(msgPayload);
+      await appendSingleMessageUI(msgPayload, true);
       playSendSound();
 
-      chatChannel.postMessage({
-        type: 'NEW_MESSAGE',
-        payload: msgPayload
-      });
+      publishGlobalEvent('chat', msgPayload);
 
       messageInput.value = '';
       messageInput.focus();
     });
 
     messageInput.addEventListener('input', () => {
-      chatChannel.postMessage({
-        type: 'USER_TYPING',
-        payload: { username: currentUser.username }
-      });
+      publishGlobalEvent('typing', { username: currentUser.username });
     });
 
     cipherInspectBtn.addEventListener('click', () => {
       showRawCiphertext = !showRawCiphertext;
       cipherInspectStatus.textContent = showRawCiphertext ? "ON" : "OFF";
       cipherInspectStatus.className = showRawCiphertext ? "font-bold text-emerald-400" : "font-bold text-slate-400";
-      renderAllMessages();
     });
 
     soundToggleBtn.addEventListener('click', () => {
       isSoundEnabled = !isSoundEnabled;
       soundIcon.textContent = isSoundEnabled ? '🔊' : '🔇';
     });
-
-    botSimToggleBtn.addEventListener('click', toggleBotSimulation);
 
     emojiPickerBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -1262,13 +1141,10 @@
       emojiMenu.classList.add('hidden');
     });
 
-    window.addEventListener('load', () => {
-      broadcastHeartbeat();
-      chatChannel.postMessage({ type: 'PING_PRESENCE', tabId: TAB_ID });
-      setInterval(() => {
-        chatChannel.postMessage({ type: 'PING_PRESENCE', tabId: TAB_ID });
-      }, 5000);
-    });
+    // GitHub Modal Listeners
+    githubDeployBtn.addEventListener('click', () => githubModal.classList.remove('hidden'));
+    closeGithubModal.addEventListener('click', () => githubModal.classList.add('hidden'));
+    gotItGithubBtn.addEventListener('click', () => githubModal.classList.add('hidden'));
 
   </script>
 </body>
